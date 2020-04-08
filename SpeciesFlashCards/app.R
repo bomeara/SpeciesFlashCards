@@ -10,10 +10,8 @@
 library(shiny)
 library(rinat)
 
-# Define UI for application that draws a histogram
 ui <- fluidPage(
 
-    # Application title
     titlePanel("Species Flash Cards"),
 
     p("This will take several seconds on initial load. Then, click New image to get a new picture to identify. If you move your mouse over the image, you can see the common and species name for the pictured organism. All pictures are research-grade observations from iNaturalist."),
@@ -27,7 +25,6 @@ ui <- fluidPage(
     
 )
 
-# Define server logic required to draw a histogram
 server <- function(input, output) {
  
     #src = "https://static.inaturalist.org/photos/64996351/medium.jpg?1585516023"
@@ -47,7 +44,6 @@ server <- function(input, output) {
     output$credit<-renderText(paste0("Photo by user <a href='https://www.inaturalist.org/people/", randspecies()$user_login,"'>",randspecies()$user_login,"</a>",  " submitted to <a href='https://www.inaturalist.org/'>iNaturalist.org</a>"))
 }
 
-# Run the application 
 
 species <- c(
     bird_voiced_treefrog="Hyla avivoca",
