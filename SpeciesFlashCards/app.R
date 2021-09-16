@@ -17,8 +17,9 @@ ui <- fluidPage(
 
     mainPanel(
         htmlOutput("intro"),
-        textAreaInput(inputId="speciesArea", label="Enter multiple species, separating each by a comma, OR enter a single URL", value="Leopard frog, Hyla avivoca, Hyla chrysoscelis, Hyla gratiosa", width = "500px"),
+        textAreaInput(inputId="speciesArea", label="Enter multiple species (scientific and/or common names), separating each by a comma, OR enter a single URL. Then click Store image locations to get ready, then New image to try one.", value="Ipomoea purpurea, Chamaecrista nictitans, Desmodium paniculatum, Ipomoea coccinea, Toxicodendron radicans, Parthenocissus quinquefolia, Oxalis stricta, Trifolium pratense, Oenothera biennis, Fagopyrum esculentum, Clematis terniflora, Ipomoea pandurata, Impatiens capensis, Lobelia cardinalis,  Persicaria punctata, Cuscuta gronovii, Amphicarpaea bracteata, Agrimonia parviflora, Lycopus rubellus, Lespedeza cuneata, Acalypha rhomboidea, Phyla lanceolata, Daucus carota, Fallopia japonica, Rudbeckia fulgida, Helenium autumnale, Agalinas purpurea, Typha latifolia, Spiranthes cernua, Oxypolis rigidior, Iva annua, Chamaecrista fasciculata", width = "500px"),
         actionButton("queryButton", "Store image locations"),
+        HTML("<br /><hr /><br />"),
         actionButton("goButton", "New image!"),
         htmlOutput("picture"),
         htmlOutput("credit"),
@@ -32,10 +33,15 @@ ui <- fluidPage(
 
 # Define server logic required to draw a histogram
 server <- function(input, output) {
-
-    if(length(image_list)==0) {
-        output$intro <- renderUI({HTML("Enter the species you want below, separated by commas. An example is <code>Leopard frog, Hyla avivoca, Hyla chrysoscelis, Hyla gratiosa</code>. You can use common names, scientific names, or a mixture. Or you can enter a single URL, such as <code><a href='https://www.nps.gov/grsm/learn/nature/fish-checklist.htm'>https://www.nps.gov/grsm/learn/nature/fish-checklist.htm</a></code>, and it will attempt to pull all species names (scientific names only) from that page. Then click the 'Store image locations' button. It will take some time to get these locations: you should see a progress bar pop up. After that, 'New image' will give you an image to identify; to see if you are right, you can mouseover the image to see the species and common name. <br /><br />")
-})
+  output$intro <- renderUI({HTML("Enter the species you want below, separated by commas. An example is <code>Leopard frog, Hyla avivoca, Hyla chrysoscelis, Hyla gratiosa</code>. You can use common names, scientific names, or a mixture. Or you can enter a single URL, such as <code><a href='https://www.nps.gov/grsm/learn/nature/fish-checklist.htm'>https://www.nps.gov/grsm/learn/nature/fish-checklist.htm</a></code>, and it will attempt to pull all species names (scientific names only) from that page. Then click the 'Store image locations' button. It will take some time to get these locations: you should see a progress bar pop up. After that, 'New image' will give you an image to identify; to see if you are right, you can mouseover the image to see the species and common name. <br /><br />")})
+    if(length(image_list)!=0)  {
+      i = sample(length(image_list),1)
+      local_obs <- image_list[[i]]
+      to_show <- local_obs[sample(sequence(nrow(local_obs)),1),]
+      
+      output$picture <- renderText({c('<img src="',to_show$image_url,'" title="', paste0(to_show$common_name, ' (', to_show$scientific_name, ')'),'">')})
+      output$credit <- renderText(paste0("Photo by user <a href='https://www.inaturalist.org/people/", to_show$user_login,"'>",to_show$user_login,"</a>",  " submitted to <a href='https://www.inaturalist.org/'>iNaturalist.org</a>"))
+      
     }
 
     randspecies <- eventReactive(input$goButton,{
@@ -102,6 +108,7 @@ server <- function(input, output) {
 }
 
 image_list <- list()
+try(load(file="fieldbotany.rda"))
 
 # Run the application
 shinyApp(ui = ui, server = server)
